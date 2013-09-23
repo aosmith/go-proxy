@@ -46,7 +46,7 @@ func ProxyServer(ws *websocket.Conn) {
 func main() {
   fmt.Println("Booting websocket server...")
   http.Handle("/", websocket.Handler(ProxyServer))
-  err := http.ListenAndServe(":3337", nil)
+  err := http.ListenAndServe(config.WsPort, nil)
   if err != nil {
     panic("Error: " + err.Error())
   }

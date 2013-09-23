@@ -1,6 +1,8 @@
 package config
 
 const (
+  WsPort = ":3337"
   DestAddress = "host:port"
   BufferSize = 2048
+  SleepTime = 100
 )
