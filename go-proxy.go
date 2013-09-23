@@ -4,9 +4,9 @@ import (
   "code.google.com/p/go.net/websocket"
   "config"
   "fmt"
-//  "io"
   "net"
   "net/http"
+  "time"
 )
 
 type connect struct {
@@ -15,27 +15,27 @@ type connect struct {
   receive chan string
 }
 
-func proxy(conn *net.Conn, ws *websocket.Conn) {
+func proxy(conn net.Conn, ws *websocket.Conn) {
   for ;; {
     var msg = make([]byte, config.BufferSize)
+    var err error
+    // Check websocket for data + send to server
     n := 0
-    for n==0 {
-      n, err = ws.Read(msg)
+    n, err = ws.Read(msg)
+    if err != nil {
+      panic("Error: " + err.Error())
+    } else if n > 0 {
+      fmt.Fprintf(conn, "%s", msg[:n])
     }
-    fmt.Printf("%s", msg[:n])
-    conn.Write(msg[:n])
-  }
-}
-
-func proxy(ws *websocket.Conn, conn *net.Conn) {
-  for ;; {
-    var msg = make([]byte, config.BufferSize)
-    n := 0
-    for n==0 {
-      n, err = conn.Read(msg)
+    // Check tcpsocket for data + send to client
+    n = 0
+    n, err = conn.Read(msg)
+    if err != nil {
+      panic("Error: " + err.Error())
+    } else if n > 0 {
+      fmt.Fprintf(ws, "%s", msg[:n])
     }
-    fmt.Printf("%s", msg[:n])
-    ws.Write(msg[:n])
+    time.Sleep(config.SleepTime * time.Millisecond)
   }
 }
 
@@ -46,10 +46,7 @@ func ProxyServer(ws *websocket.Conn) {
     panic("Error: " + err.Error())
   }
   defer conn.Close()
-  for ;; {
-    go proxy(ws, conn)
-    go proxy(conn, ws)
-  }
+  proxy(conn, ws)
 }
 
 func main() {
