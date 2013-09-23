@@ -9,12 +9,6 @@ import (
   "time"
 )
 
-type connect struct {
-  ws *websocket.Conn
-  send chan string
-  receive chan string
-}
-
 func proxy(conn net.Conn, ws *websocket.Conn) {
   for ;; {
     var msg = make([]byte, config.BufferSize)
