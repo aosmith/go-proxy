@@ -15,14 +15,7 @@ type connect struct {
   receive chan string
 }
 
-func ProxyServer(ws *websocket.Conn) {
-  fmt.Println("Got websocket data: ")
-  fmt.Println(ws)
-  conn, err := net.Dial("tcp", config.DestAddress)
-  if err != nil {
-    panic("Error: " + err.Error())
-  }
-  defer conn.Close()
+func proxy(conn *net.Conn, ws *websocket.Conn) {
   for ;; {
     var msg = make([]byte, config.BufferSize)
     n := 0
@@ -30,22 +23,33 @@ func ProxyServer(ws *websocket.Conn) {
       n, err = ws.Read(msg)
     }
     fmt.Printf("%s", msg[:n])
-    conn, err := net.Dial("tcp", config.DestAddress)
-    defer conn.Close()
-    if err != nil {
-      panic("Error opening tcp connection: " + err.Error())
-    }
     conn.Write(msg[:n])
-    n = 0
-    var msg2 = make([]byte, config.BufferSize)
+  }
+}
+
+func proxy(ws *websocket.Conn, conn *net.Conn) {
+  for ;; {
+    var msg = make([]byte, config.BufferSize)
+    n := 0
     for n==0 {
       n, err = conn.Read(msg)
     }
     fmt.Printf("%s", msg[:n])
-    ws.Write(msg2[:n])
+    ws.Write(msg[:n])
   }
-  // io.Copy(ws,conn)
+}
 
+func ProxyServer(ws *websocket.Conn) {
+  fmt.Println("New websocket connection")
+  conn, err := net.Dial("tcp", config.DestAddress)
+  if err != nil {
+    panic("Error: " + err.Error())
+  }
+  defer conn.Close()
+  for ;; {
+    go proxy(ws, conn)
+    go proxy(conn, ws)
+  }
 }
 
 func main() {
