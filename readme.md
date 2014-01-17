@@ -1,3 +1,7 @@
+go-proxy
+========
+
+
 TLDR; A simple websocket / tcp proxy written in go.
 
 I use this to work around upstream restrictions.  It allows you to proxy http traffic through a websocket (eg, javascript client).
