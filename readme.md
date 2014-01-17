@@ -12,6 +12,7 @@ You'll also need to copy & configure src/config/config.go
 
 
 Todo:
+-----
 
--Consider using channels instead of simple byte buffers.
--HTTPS?
+  * Consider using channels instead of simple byte buffers.
+  * HTTPS?
